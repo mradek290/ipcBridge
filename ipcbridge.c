@@ -172,9 +172,9 @@ ipcbBridge* ipcb__InitBridge( unsigned long long clientid, unsigned long long bu
         return 0;
     }
 
-    bridge.Client.ClientNotification = ipcb__CreateSharedEvent(
+    bridge.Server.ClientNotification = ipcb__CreateSharedEvent(
         clientproc,
-        &(bridge.Server.ClientNotification),
+        &(bridge.Client.ClientNotification),
         e
     );
 
@@ -281,11 +281,176 @@ ipcbBridge* ipcbAwaitConnection( ipcbServer* server, ipcbError* e ){
     }
 }
 
-ipcbBridge* ipcbConnectServer( const char* servername, ipcbError* e ){
+ipcbBridge* ipcbConnectServer( const char* servername, unsigned long long buffer_sz, ipcbError* e ){
 
     ipcbError dummyerror;
     if( !e ) e = &dummyerror;
 
+    const unsigned namebuffer_sz = 200;
+    char namebuffer[namebuffer_sz];
+    unsigned name_sz = ipcb__MakePipeName(
+        servername, strlen(servername),
+        namebuffer, namebuffer_sz
+    );
+
+    if( name_sz == 0 ){
+        *e = ipcberr_ServerNameInvalid;
+        return 0;
+    }
+
+    _Bool waitsuccess = WaitNamedPipe(namebuffer, NMPWAIT_WAIT_FOREVER );
+    if( !waitsuccess ){
+        *e = ipcberr_ClientConnectionAwaitFailure;
+        return 0;
+    }
+
+    HANDLE pipe = CreateFile(
+        namebuffer,
+        GENERIC_READ | GENERIC_WRITE,
+        0 /*no sharing*/,
+        0 /*default security*/,
+        OPEN_EXISTING,
+        0 /*default flags*/,
+        0 /*no template*/
+    );
+
+    if( pipe == INVALID_HANDLE_VALUE ){
+        *e = ipcberr_ClientConnectFailure;
+        return 0;
+    }
+
+    unsigned long long clientinfo[] = {
+        GetCurrentProcessId(), buffer_sz
+    };
+
+    DWORD byteswritten;
+    _Bool writesuccess = WriteFile(
+        pipe,
+        clientinfo, sizeof(clientinfo),
+        &byteswritten, 0
+    );
+
+    if( !writesuccess || byteswritten != sizeof(clientinfo) ){
+        CloseHandle(pipe);
+        *e = ipcberr_ClientCannotIdentifyToServer;
+        return 0;
+    }
+
+    ipcbBridge bridge;
+    DWORD bytesread;
+    bridge.Error = ~0;
+
+    _Bool readsuccess = ReadFile(
+        pipe,
+        &bridge, sizeof(ipcbBridge),
+        &bytesread, 0
+    );
+
+    if( !readsuccess || bytesread != sizeof(ipcbBridge) ){
+        CloseHandle(pipe);
+        *e = ipcberr_ServerCannotRespondToClient;
+        return 0;
+    }
+
+    if( bridge.Error != ipcberr_NoError ){
+        CloseHandle(pipe);
+        *e = ipcberr_InvalidBridge;
+        return 0;
+    }
+
+    bridge.Client.MemoryAddress = MapViewOfFile(
+        bridge.Client.SharedMemory,
+        FILE_MAP_READ | FILE_MAP_WRITE | FILE_MAP_COPY,
+        0, 0, /*no memory offset*/
+        (DWORD) bridge.SharedMemorySize
+    );
+
+    if( !bridge.Client.MemoryAddress ){
+        //TODO figure out proper clean up here
+        *e = ipcberr_ClientCannotOpenSharedMemory;
+        CloseHandle(pipe);
+        return 0;
+    }
+
+    ipcbBridge* result = (ipcbBridge*) malloc(sizeof(ipcbBridge));
+    memcpy( result, &bridge, sizeof(ipcbBridge) );
+    *e = ipcberr_NoError;
+
+    CloseHandle(pipe);
+    return result;
+}
+
+unsigned ipcb__WriteToSharedBuffer( _Bool* base, unsigned limit, unsigned offset, const void* buffer, unsigned buffer_sz ){
+
+    _Bool* upperbound = base + limit;
+    _Bool* targetadr = base + offset;
+
+    if( upperbound < targetadr )
+        return 0;
+
+    if( upperbound < targetadr + buffer_sz ){
+        buffer_sz = upperbound - targetadr;
+    }
+
+    memcpy( targetadr, buffer, buffer_sz );
+    return buffer_sz;
+}
+
+unsigned ipcbWriteToClient( ipcbBridge* bridge, unsigned offset, const void* buffer, unsigned buffer_sz ){
+    return ipcb__WriteToSharedBuffer(
+        (_Bool*) bridge->Server.MemoryAddress,
+        bridge->SharedMemorySize,
+        offset, buffer,buffer_sz
+    );
+}
+
+unsigned ipcbWriteToserver( ipcbBridge* bridge, unsigned offset, const void* buffer, unsigned buffer_sz ){
+    return ipcb__WriteToSharedBuffer(
+        (_Bool*) bridge->Client.MemoryAddress,
+        bridge->SharedMemorySize,
+        offset, buffer,buffer_sz
+    );
+}
+
+void ipcb__AwaitSignal( void* signal, ipcbError* e ){
+
+    ipcbError dummyerror;
+    if( !e ) e = &dummyerror;
+
+    DWORD status = WaitForSingleObject(signal, INFINITE);
+    if( status == WAIT_OBJECT_0 ){
+        *e = ipcberr_NoError;
+    }else{
+        *e = ipcberr_FailedToAwaitSignal;
+    }
+}
+
+void ipcbAwaitServer( ipcbBridge* bridge, ipcbError* e ){
+    ipcb__AwaitSignal( bridge->Client.ServerNotification, e );
+}
+
+void ipcbAwaitClient( ipcbBridge* bridge, ipcbError* e ){
+    ipcb__AwaitSignal( bridge->Server.ClientNotification, e );
+}
+
+void ipcb__SendSignal( void* signal, ipcbError* e ){
+
+    ipcbError dummyerror;
+    if( !e ) e = &dummyerror;
+
+    if( SetEvent(signal) ){
+        *e = ipcberr_NoError;
+    }else{
+        *e = ipcberr_FailedToSendSignal;
+    }
+}
+
+void ipcbSignalServer( ipcbBridge* bridge, ipcbError* e ){
+    ipcb__SendSignal( bridge->Client.ClientNotification, e );
+}
+
+void ipcbSignalClient( ipcbBridge* bridge, ipcbError* e ){
+    ipcb__SendSignal( bridge->Server.ServerNotification, e );
 }
 
 void ipcbShutdownServer( ipcbServer* server, ipcbError* e ){

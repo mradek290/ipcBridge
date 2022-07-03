@@ -35,5 +35,5 @@ function Make-Binary( $ifile, $ofile, $flags ){
 
 Clear-Host
 
-#Make-Binary -ifile 'democlient.c' -ofile 'client.exe'
+Make-Binary -ifile 'democlient.c' -ofile 'client.exe'
 Make-Binary -ifile 'demoserver.c' -ofile 'server.exe'

@@ -19,7 +19,14 @@ typedef enum{
     ipcberr_CannotCreateSynchronization,
     ipcberr_CannotShareSynchronization,
     ipcberr_ServerCannotOpenSharedMemory,
-    ipcberr_ServerCannotRespondToClient
+    ipcberr_ServerCannotRespondToClient,
+    ipcberr_ClientConnectionAwaitFailure,
+    ipcberr_ClientConnectFailure,
+    ipcberr_ClientCannotIdentifyToServer,
+    ipcberr_InvalidBridge,
+    ipcberr_ClientCannotOpenSharedMemory,
+    ipcberr_FailedToAwaitSignal,
+    ipcberr_FailedToSendSignal
 } ipcbError;
 
 typedef enum{
@@ -43,11 +50,33 @@ typedef struct ipcb__Bridge{
     ipcbError Error;
 } ipcbBridge;
 
-#include "ipcbridge.c"
-
 ipcbServer* ipcbInitServer( const char*, ipcbError* );
 ipcbBridge* ipcbAwaitConnection( ipcbServer*, ipcbError* );
 void        ipcbShutdownServer( ipcbServer*, ipcbError* );
-ipcbBridge* ipcbConnectServer( const char*, ipcbError* );
+ipcbBridge* ipcbConnectServer( const char*, unsigned long long, ipcbError* );
+void ipcbCloseBridge( ipcbBridge*, ipcbSide );
+
+unsigned ipcbWriteToClient( ipcbBridge*, unsigned, const void*, unsigned );
+unsigned ipcbWriteToserver( ipcbBridge*, unsigned, const void*, unsigned );
+
+void ipcbAwaitServer( ipcbBridge*, ipcbError* );
+void ipcbAwaitClient( ipcbBridge*, ipcbError* );
+
+void ipcbSignalServer( ipcbBridge*, ipcbError* );
+void ipcbSignalClient( ipcbBridge*, ipcbError* );
+
+unsigned ipcbReadFromClient( ipcbBridge*, unsigned, void*, unsigned );
+unsigned ipcbReadFromServer( ipcbBridge*, unsigned, void*, unsigned );
+
+/*
+ * TODO
+ * implement server shutdown
+ * implement cleanup for connect server failing to open shared region
+ * implement close bridge
+ * resolve error codes to messages
+ * implement reading from shared mem
+*/
+
+#include "ipcbridge.c"
 
 #endif
