@@ -1,0 +1,6 @@
+
+*.exe
+*.o
+*.dll
+democlient.c
+demoserver.c
