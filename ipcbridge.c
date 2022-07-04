@@ -200,6 +200,7 @@ ipcbBridge* ipcb__InitBridge( unsigned long long clientid, unsigned long long bu
 
     bridge.Server.Control = (ipcbControlInstance*) mapping;
     bridge.Server.MemoryAddress = mapping + ipcb__ControlInstanceOffset;
+    bridge.Server.Control->isServerActive = 1;
 
     ipcbBridge* result = (ipcbBridge*) malloc(sizeof(ipcbBridge));
     memcpy( result, &bridge, sizeof(ipcbBridge) );
@@ -210,12 +211,30 @@ ipcbBridge* ipcb__InitBridge( unsigned long long clientid, unsigned long long bu
 
 void ipcbCloseBridge( ipcbBridge* bridge, ipcbSide side ){
 
-    if( side & ipcbside_Client ){
+    if( side == ipcbside_Client ){
 
+        bridge->Client.Control->isClientActive = 0;
+
+        UnmapViewOfFile(bridge->Client.Control);
+        CloseHandle(bridge->Client.MemoryAddress);
+        CloseHandle(bridge->Client.ServerNotification);
+        CloseHandle(bridge->Client.ClientNotification);
+
+        free(bridge);
+
+        return;
     }
 
-    if( side & ipcbside_Server ){
+    if( side == ipcbside_Server ){
 
+        bridge->Server.Control->isServerActive = 0;
+
+        UnmapViewOfFile(bridge->Server.Control);
+        CloseHandle(bridge->Server.MemoryAddress);
+        CloseHandle(bridge->Server.ServerNotification);
+        CloseHandle(bridge->Server.ClientNotification);
+
+        free(bridge);
     }
 }
 
@@ -369,7 +388,11 @@ ipcbBridge* ipcbConnectServer( const char* servername, unsigned long long buffer
     );
 
     if( !mapping ){
-        //TODO figure out proper clean up here
+        
+        CloseHandle(bridge.Client.SharedMemory);
+        CloseHandle(bridge.Client.ServerNotification);
+        CloseHandle(bridge.Client.ClientNotification);
+
         *e = ipcberr_ClientCannotOpenSharedMemory;
         CloseHandle(pipe);
         return 0;
@@ -377,6 +400,7 @@ ipcbBridge* ipcbConnectServer( const char* servername, unsigned long long buffer
 
     bridge.Client.Control = (ipcbControlInstance*) mapping;
     bridge.Client.MemoryAddress = mapping + ipcb__ControlInstanceOffset;
+    bridge.Client.Control->isClientActive = 1;
 
     ipcbBridge* result = (ipcbBridge*) malloc(sizeof(ipcbBridge));
     memcpy( result, &bridge, sizeof(ipcbBridge) );
@@ -451,6 +475,14 @@ void ipcb__SendSignal( void* signal, ipcbError* e ){
     }
 }
 
+_Bool ipcbIsServerConnectionOpen( ipcbBridge* bridge ){
+    return bridge->Client.Control->isServerActive;
+}
+
+_Bool ipcbIsClientConnectionOpen( ipcbBridge* bridge ){
+    return bridge->Server.Control->isClientActive;
+}
+
 void ipcbSignalServer( ipcbBridge* bridge, ipcbError* e ){
     ipcb__SendSignal( bridge->Client.ClientNotification, e );
 }
@@ -459,8 +491,9 @@ void ipcbSignalClient( ipcbBridge* bridge, ipcbError* e ){
     ipcb__SendSignal( bridge->Server.ServerNotification, e );
 }
 
-void ipcbShutdownServer( ipcbServer* server, ipcbError* e ){
-
+void ipcbShutdownServer( ipcbServer* server ){
+    DisconnectNamedPipe(server);
+    CloseHandle(server);
 }
 
 #endif

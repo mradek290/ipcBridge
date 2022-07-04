@@ -60,7 +60,7 @@ typedef struct ipcb__Bridge{
 
 ipcbServer* ipcbInitServer( const char*, ipcbError* );
 ipcbBridge* ipcbAwaitConnection( ipcbServer*, ipcbError* );
-void        ipcbShutdownServer( ipcbServer*, ipcbError* );
+void        ipcbShutdownServer( ipcbServer* );
 ipcbBridge* ipcbConnectServer( const char*, unsigned long long, ipcbError* );
 void ipcbCloseBridge( ipcbBridge*, ipcbSide );
 
@@ -76,13 +76,12 @@ void ipcbSignalClient( ipcbBridge*, ipcbError* );
 unsigned ipcbReadFromClient( ipcbBridge*, unsigned, void*, unsigned );
 unsigned ipcbReadFromServer( ipcbBridge*, unsigned, void*, unsigned );
 
+_Bool ipcbIsServerConnectionOpen( ipcbBridge* );
+_Bool ipcbIsClientConnectionOpen( ipcbBridge* );
+
 /*
  * TODO
- * implement server shutdown
- * implement cleanup for connect server failing to open shared region
- * implement close bridge
  * resolve error codes to messages
- * implement reading from shared mem
 */
 
 #include "ipcbridge.c"
