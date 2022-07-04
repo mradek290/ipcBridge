@@ -1,4 +1,5 @@
 ﻿using System;
+using ipcBridge.NET;
 
 namespace DemoClient
 {
@@ -6,6 +7,8 @@ namespace DemoClient
     {
         static void Main(string[] args)
         {
+            var connection = BridgeServer.Connect("mar");
+
         }
     }
 }
