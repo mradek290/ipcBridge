@@ -12,8 +12,8 @@ namespace DemoServer
             connection.Await();
 
             var buffer = new byte[1000];
-            connection.Read(buffer);
-            string message = BitConverter.ToString(buffer);
+            connection.Read(100, buffer);
+            string message = System.Text.Encoding.UTF8.GetString(buffer);
 
             Console.WriteLine(message);
 
