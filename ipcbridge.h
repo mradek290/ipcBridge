@@ -79,8 +79,8 @@ IPC_BRIDGE_DECLSPEC void ipcbAwaitClient( ipcbBridge*, ipcbError* );
 IPC_BRIDGE_DECLSPEC void ipcbSignalServer( ipcbBridge*, ipcbError* );
 IPC_BRIDGE_DECLSPEC void ipcbSignalClient( ipcbBridge*, ipcbError* );
 
-IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromClient( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz ){
-IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromServer( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz ){
+IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromClient( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz );
+IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromServer( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz );
 
 IPC_BRIDGE_DECLSPEC _Bool ipcbIsServerConnectionOpen( ipcbBridge* );
 IPC_BRIDGE_DECLSPEC _Bool ipcbIsClientConnectionOpen( ipcbBridge* );
