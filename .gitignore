@@ -4,3 +4,10 @@
 *.dll
 democlient.c
 demoserver.c
+dotNet/DemoClient/bin/
+dotnet/DemoClient/obj/
+dotNet/DemoServer/bin/
+dotNet/DemoServer/obj/
+dotNet/ipcBridge.NET/bin/
+dotNet/ipcBridge.NET/obj/
+dotNet/.vs/
