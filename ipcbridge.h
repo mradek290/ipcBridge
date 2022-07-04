@@ -36,11 +36,17 @@ typedef enum{
 
 typedef void ipcbServer;
 
+typedef struct ipcb__ControlInstance{
+    _Bool isServerActive;
+    _Bool isClientActive;
+} ipcbControlInstance;
+
 typedef struct ipcb__HandleGroup{
     void* SharedMemory;
     void* ServerNotification;
     void* ClientNotification;
     void* MemoryAddress;
+    ipcbControlInstance* Control;
 } ipcbHandleGroup;
 
 typedef struct ipcb__Bridge{
@@ -49,6 +55,8 @@ typedef struct ipcb__Bridge{
     unsigned SharedMemorySize;
     ipcbError Error;
 } ipcbBridge;
+
+#define ipcb__ControlInstanceOffset (sizeof(void*) * (1 + sizeof(ipcbControlInstance)/sizeof(void*)))
 
 ipcbServer* ipcbInitServer( const char*, ipcbError* );
 ipcbBridge* ipcbAwaitConnection( ipcbServer*, ipcbError* );

@@ -184,19 +184,22 @@ ipcbBridge* ipcb__InitBridge( unsigned long long clientid, unsigned long long bu
         return 0;
     }
 
-    bridge.Server.MemoryAddress = MapViewOfFile(
+    _Bool* mapping = (_Bool*) MapViewOfFile(
         bridge.Server.SharedMemory,
         FILE_MAP_READ | FILE_MAP_WRITE | FILE_MAP_COPY,
         0, 0, /*no memory offset*/
         li_size.LowPart
     );
 
-    if( !bridge.Server.MemoryAddress ){
+    if( !mapping ){
         CloseHandle(clientproc);
         ipcb__DeinitBridge(&bridge);
         *e = ipcberr_ServerCannotOpenSharedMemory;
         return 0;
     }
+
+    bridge.Server.Control = (ipcbControlInstance*) mapping;
+    bridge.Server.MemoryAddress = mapping + ipcb__ControlInstanceOffset;
 
     ipcbBridge* result = (ipcbBridge*) malloc(sizeof(ipcbBridge));
     memcpy( result, &bridge, sizeof(ipcbBridge) );
@@ -358,19 +361,22 @@ ipcbBridge* ipcbConnectServer( const char* servername, unsigned long long buffer
         return 0;
     }
 
-    bridge.Client.MemoryAddress = MapViewOfFile(
+    _Bool* mapping = (_Bool*) MapViewOfFile(
         bridge.Client.SharedMemory,
         FILE_MAP_READ | FILE_MAP_WRITE | FILE_MAP_COPY,
         0, 0, /*no memory offset*/
         (DWORD) bridge.SharedMemorySize
     );
 
-    if( !bridge.Client.MemoryAddress ){
+    if( !mapping ){
         //TODO figure out proper clean up here
         *e = ipcberr_ClientCannotOpenSharedMemory;
         CloseHandle(pipe);
         return 0;
     }
+
+    bridge.Client.Control = (ipcbControlInstance*) mapping;
+    bridge.Client.MemoryAddress = mapping + ipcb__ControlInstanceOffset;
 
     ipcbBridge* result = (ipcbBridge*) malloc(sizeof(ipcbBridge));
     memcpy( result, &bridge, sizeof(ipcbBridge) );
