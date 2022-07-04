@@ -57,6 +57,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(SolutionDir)..\ipcbridge.dll $(SolutionDir)ipcBridge.NET\$(OutDir)ipcbridge.dll</PostBuildEvent>
+    <PostBuildEvent>copy $(SolutionDir)..\ipcbridge.dll $(SolutionDir)DemoClient\$(OutDir)ipcbridge.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>
