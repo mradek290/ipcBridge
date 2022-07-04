@@ -17,6 +17,8 @@ namespace ipcBridge.NET
 
         bool isConnected();
 
+        string getServerName();
+
     } //End of interface
 
 } //End of namespace

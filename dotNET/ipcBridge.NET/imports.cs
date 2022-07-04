@@ -64,10 +64,10 @@ namespace ipcBridge.NET
         public static unsafe extern void ipcbSignalClient(void* bridge, UInt32* error);
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static unsafe extern bool ipcbIsServerConnectionOpen(void* bridge, UInt32* error );
+        public static unsafe extern bool ipcbIsServerConnectionOpen(void* bridge );
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static unsafe extern bool ipcbIsClientConnectionOpen(void* bridge, UInt32* error );
+        public static unsafe extern bool ipcbIsClientConnectionOpen(void* bridge );
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static unsafe extern UInt32 ipcbGetSharedMemorySize(void* bridge);
