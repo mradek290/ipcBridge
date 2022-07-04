@@ -255,7 +255,7 @@ ipcbBridge* ipcbAwaitConnection( ipcbServer* server, ipcbError* e ){
 
     if( !readsuccess || bytesread != sizeof(clientinfo) ){
         *e = ipcberr_ServerCannotIdentifyClient;
-        DisconnectNamedPipe(pipe);
+        DisconnectNamedPipe(server);
         return 0;
     }
 
