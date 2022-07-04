@@ -3,7 +3,7 @@
 
 namespace ipcBridge.NET
 {
-    public interface IBridge
+    public interface IBridge : IDisposable
     {
     } //End of interface
 

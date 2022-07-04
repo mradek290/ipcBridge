@@ -2,13 +2,19 @@
 
 namespace ipcBridge.NET
 {
-    class ClientSideBridge : IDisposable, IBridge
+    internal class ClientSideBridge : IBridge
     {
+        internal unsafe void* bridgehandle;
+
+        public unsafe ClientSideBridge( void* bridge)
+        {
+            bridgehandle = bridge;
+        }
+
         public void Dispose()
         {
             throw new NotImplementedException();
         }
-
     } //End of class
 
 } //End of namespace
