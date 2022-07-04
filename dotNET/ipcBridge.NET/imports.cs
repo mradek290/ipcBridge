@@ -79,10 +79,10 @@ namespace ipcBridge.NET
         private static unsafe extern UInt32 ipcbWriteToServer__(void* bridge, UInt32 offset, void* buffer, UInt32 buffersize);
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ipcbReadFromClient")]
-        private static unsafe extern UInt32 ipcbReadFromClient__(void* bridge, UInt32 offset, void* buffer, UInt32 buffersize);
+        private static unsafe extern UInt32 ipcbReadFromClient__(void* bridge, UInt32 offset, UInt32 toread, void* buffer, UInt32 buffersize);
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ipcbReadFromServer")]
-        private static unsafe extern UInt32 ipcbReadFromServer__(void* bridge, UInt32 offset, void* buffer, UInt32 buffersize);
+        private static unsafe extern UInt32 ipcbReadFromServer__(void* bridge, UInt32 offset, UInt32 toread, void* buffer, UInt32 buffersize);
 
         [DllImport(dllName: NativeBinary, CallingConvention = CallingConvention.Cdecl, EntryPoint = "ipcbResolveErrorCode")]
         private static unsafe extern IntPtr ipcbResolveErrorCode__(UInt32 x);
@@ -114,19 +114,19 @@ namespace ipcBridge.NET
             }
         }
 
-        public static unsafe UInt32 ipcbReadFromServer(void* bridge, UInt32 offset, byte[] buffer)
+        public static unsafe UInt32 ipcbReadFromServer(void* bridge, UInt32 offset, UInt32 toread, byte[] buffer)
         {
             fixed (void* fixture = buffer)
             {
-                return ipcbReadFromServer__(bridge, offset, fixture, (UInt32)buffer.Length);
+                return ipcbReadFromServer__(bridge, offset, toread, fixture, (UInt32)buffer.Length);
             }
         }
 
-        public static unsafe UInt32 ipcbReadFromClient(void* bridge, UInt32 offset, byte[] buffer)
+        public static unsafe UInt32 ipcbReadFromClient(void* bridge, UInt32 offset, UInt32 toread, byte[] buffer)
         {
             fixed (void* fixture = buffer)
             {
-                return ipcbReadFromClient__(bridge, offset, fixture, (UInt32)buffer.Length);
+                return ipcbReadFromClient__(bridge, offset, toread, fixture, (UInt32)buffer.Length);
             }
         }
 

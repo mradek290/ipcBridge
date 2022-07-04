@@ -55,15 +55,15 @@ namespace ipcBridge.NET
             }
         }
 
-        public uint Read(byte[] buffer, uint bridgeoffset)
+        public uint Read(uint toread, byte[] buffer, uint bridgeoffset)
         {
             unsafe
             {
-                return Imports.ipcbReadFromClient(bridgehandle, bridgeoffset, buffer);
+                return Imports.ipcbReadFromClient(bridgehandle, bridgeoffset, toread, buffer);
             }
         }
 
-        public uint Read(byte[] buffer) => Read(buffer, 0);
+        public uint Read(uint toread, byte[] buffer) => Read(toread, buffer, 0);
 
         public void Signal()
         {
@@ -80,7 +80,10 @@ namespace ipcBridge.NET
 
         public uint Write(byte[] buffer, uint bridgeoffset)
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                return Imports.ipcbWriteToClient(bridgehandle, bridgeoffset, buffer);
+            }
         }
 
         public uint Write(byte[] buffer) => Write(buffer, 0);

@@ -9,8 +9,8 @@ namespace ipcBridge.NET
         void Await();
         void Signal();
 
-        uint Read(byte[] buffer, uint bridgeoffset);
-        uint Read(byte[] buffer);
+        uint Read(uint toread, byte[] buffer, uint bridgeoffset);
+        uint Read(uint toread, byte[] buffer);
 
         uint Write(byte[] buffer, uint bridgeoffset);
         uint Write(byte[] buffer);
