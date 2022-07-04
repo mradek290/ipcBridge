@@ -211,7 +211,7 @@ ipcbBridge* ipcb__InitBridge( unsigned long long clientid, unsigned long long bu
 
 void ipcbCloseBridge( ipcbBridge* bridge, ipcbSide side ){
 
-    if( side == ipcbside_Client ){
+    if( side & ipcbside_Client ){
 
         bridge->Client.Control->isClientActive = 0;
 
@@ -221,11 +221,9 @@ void ipcbCloseBridge( ipcbBridge* bridge, ipcbSide side ){
         CloseHandle(bridge->Client.ClientNotification);
 
         free(bridge);
-
-        return;
     }
 
-    if( side == ipcbside_Server ){
+    if( side & ipcbside_Server ){
 
         bridge->Server.Control->isServerActive = 0;
 
@@ -494,6 +492,69 @@ void ipcbSignalClient( ipcbBridge* bridge, ipcbError* e ){
 void ipcbShutdownServer( ipcbServer* server ){
     DisconnectNamedPipe(server);
     CloseHandle(server);
+}
+
+const char ipcbResolveErrorCode( ipcbError e ){
+
+    switch( e ){
+
+        case ipcberr_NoError :
+            return "No Error";
+
+        case ipcberr_ServerNameInvalid :
+            return "Invalid Servername";
+
+        case ipcberr_ServerCreationFailed :
+            return "Failed to instantiate Server";
+
+        case ipcberr_ServerAwaitConnectionFailure :
+            return "Server failed to await an incoming connection. Server intance may be invalid now.";
+
+        case ipcberr_ServerCannotIdentifyClient :
+            return "Server failed to identify client process. Server likely has insufficient privilege";
+
+        case ipcberr_BridgeInitializationFailure :
+            return "Unable to allocate a shared memory segment";
+
+        case ipcberr_UnableToLoadClientIdentity :
+            return "Server cannot obtain client identity. Server likely has insufficient privilege";
+
+        case ipcberr_BridgeSharingFailure :
+            return "Unable to share memory segment with client";
+
+        case ipcberr_CannotCreateSynchronization :
+            return "Server failed to created a synchronization primitive";
+
+        case ipcberr_CannotShareSynchronization :
+            return "Server failed to share a synchronization primitive with the client";
+
+        case ipcberr_ServerCannotOpenSharedMemory :
+            return "Server failed to open the shared memory segment";
+
+        case ipcberr_ServerCannotRespondToClient :
+            return "Unabel to submit bridge handles to client";
+
+        case ipcberr_ClientConnectionAwaitFailure :
+        case ipcberr_ClientConnectFailure :
+            return "Unable to establich connection to Server. Server might not be available";
+
+        case ipcberr_ClientCannotIdentifyToServer :
+            return "Client failed to identify to server";
+
+        case ipcberr_InvalidBridge :
+            return "Server submitted an invalid bridge";
+
+        case ipcberr_ClientCannotOpenSharedMemory :
+            return "Client failed to open the shared memory segment";
+
+        case ipcberr_FailedToAwaitSignal :
+            return "Failed to await signal";
+
+        case ipcberr_FailedToSendSignal :
+            return "Failed to send signal";
+
+        default : return "Error code not recognized";
+    }
 }
 
 #endif

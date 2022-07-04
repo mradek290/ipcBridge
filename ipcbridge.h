@@ -79,10 +79,7 @@ unsigned ipcbReadFromServer( ipcbBridge*, unsigned, void*, unsigned );
 _Bool ipcbIsServerConnectionOpen( ipcbBridge* );
 _Bool ipcbIsClientConnectionOpen( ipcbBridge* );
 
-/*
- * TODO
- * resolve error codes to messages
-*/
+const char* ipcbResolveErrorCode( ipcbError );
 
 #include "ipcbridge.c"
 
