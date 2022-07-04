@@ -71,7 +71,7 @@ IPC_BRIDGE_DECLSPEC ipcbBridge* ipcbConnectServer( const char*, unsigned long lo
 IPC_BRIDGE_DECLSPEC void ipcbCloseBridge( ipcbBridge*, ipcbSide );
 
 IPC_BRIDGE_DECLSPEC unsigned ipcbWriteToClient( ipcbBridge*, unsigned, const void*, unsigned );
-IPC_BRIDGE_DECLSPEC unsigned ipcbWriteToserver( ipcbBridge*, unsigned, const void*, unsigned );
+IPC_BRIDGE_DECLSPEC unsigned ipcbWriteToServer( ipcbBridge*, unsigned, const void*, unsigned );
 
 IPC_BRIDGE_DECLSPEC void ipcbAwaitServer( ipcbBridge*, ipcbError* );
 IPC_BRIDGE_DECLSPEC void ipcbAwaitClient( ipcbBridge*, ipcbError* );

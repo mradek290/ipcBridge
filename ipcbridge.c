@@ -432,7 +432,7 @@ unsigned ipcbWriteToClient( ipcbBridge* bridge, unsigned offset, const void* buf
     );
 }
 
-unsigned ipcbWriteToserver( ipcbBridge* bridge, unsigned offset, const void* buffer, unsigned buffer_sz ){
+unsigned ipcbWriteToServer( ipcbBridge* bridge, unsigned offset, const void* buffer, unsigned buffer_sz ){
     return ipcb__WriteToSharedBuffer(
         (_Bool*) bridge->Client.MemoryAddress,
         bridge->SharedMemorySize,
