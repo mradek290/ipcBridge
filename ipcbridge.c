@@ -494,7 +494,7 @@ void ipcbShutdownServer( ipcbServer* server ){
     CloseHandle(server);
 }
 
-const char ipcbResolveErrorCode( ipcbError e ){
+const char* ipcbResolveErrorCode( ipcbError e ){
 
     switch( e ){
 
@@ -556,5 +556,15 @@ const char ipcbResolveErrorCode( ipcbError e ){
         default : return "Error code not recognized";
     }
 }
+
+//------------------------------------------------------------
+
+#ifdef IPC_BRIDGE_DLL_EXPORT
+
+unsigned ipcbGetSharedMemorySize( ipcbBridge* bridge ){
+    return bridge->SharedMemorySize;
+}
+
+#endif
 
 #endif

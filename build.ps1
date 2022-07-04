@@ -1,7 +1,7 @@
 
 $compiler = 'E:\x86_64-8.1.0-release-win32-seh-rt_v6-rev0\bin\gcc.exe'
 $build_flags = '-flto -O3 -m64 -std=c99 -pedantic -s'
-$link_flags = "-v '-Wl,--subsystem,windows'"
+$link_flags = "'-Wl,--subsystem,windows'"
 
 function Make-OFile( $ifile, $ofile, $flags ){
     Invoke-Expression "$compiler -c $ifile -o $ofile $Script:build_flags $flags"
@@ -35,5 +35,8 @@ function Make-Binary( $ifile, $ofile, $flags ){
 
 Clear-Host
 
-Make-Binary -ifile 'democlient.c' -ofile 'client.exe'
-Make-Binary -ifile 'demoserver.c' -ofile 'server.exe'
+#Make-Binary -ifile 'democlient.c' -ofile 'client.exe'
+#Make-Binary -ifile 'demoserver.c' -ofile 'server.exe'
+
+Make-OFile -ifile 'ipcbridge.c' -ofile 'ipc.o' -flags '-D IPC_BRIDGE_DLL_EXPORT'
+Link-DLL -ifile 'ipc.o' -ofile 'ipcbridge.dll'

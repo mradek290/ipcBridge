@@ -2,6 +2,12 @@
 #ifndef IPC_BRIDGE_HEADER__
 #define IPC_BRIDGE_HEADER__
 
+#ifdef IPC_BRIDGE_DLL_EXPORT
+#define IPC_BRIDGE_DECLSPEC __declspec(dllexport)
+#else
+#define IPC_BRIDGE_DECLSPEC
+#endif
+
 #include <windows.h>
 
 #define ipcb__ServerDefaultBufferSize (1<<10)
@@ -58,28 +64,36 @@ typedef struct ipcb__Bridge{
 
 #define ipcb__ControlInstanceOffset (sizeof(void*) * (1 + sizeof(ipcbControlInstance)/sizeof(void*)))
 
-ipcbServer* ipcbInitServer( const char*, ipcbError* );
-ipcbBridge* ipcbAwaitConnection( ipcbServer*, ipcbError* );
-void        ipcbShutdownServer( ipcbServer* );
-ipcbBridge* ipcbConnectServer( const char*, unsigned long long, ipcbError* );
-void ipcbCloseBridge( ipcbBridge*, ipcbSide );
+IPC_BRIDGE_DECLSPEC ipcbServer* ipcbInitServer( const char*, ipcbError* );
+IPC_BRIDGE_DECLSPEC ipcbBridge* ipcbAwaitConnection( ipcbServer*, ipcbError* );
+IPC_BRIDGE_DECLSPEC void        ipcbShutdownServer( ipcbServer* );
+IPC_BRIDGE_DECLSPEC ipcbBridge* ipcbConnectServer( const char*, unsigned long long, ipcbError* );
+IPC_BRIDGE_DECLSPEC void ipcbCloseBridge( ipcbBridge*, ipcbSide );
 
-unsigned ipcbWriteToClient( ipcbBridge*, unsigned, const void*, unsigned );
-unsigned ipcbWriteToserver( ipcbBridge*, unsigned, const void*, unsigned );
+IPC_BRIDGE_DECLSPEC unsigned ipcbWriteToClient( ipcbBridge*, unsigned, const void*, unsigned );
+IPC_BRIDGE_DECLSPEC unsigned ipcbWriteToserver( ipcbBridge*, unsigned, const void*, unsigned );
 
-void ipcbAwaitServer( ipcbBridge*, ipcbError* );
-void ipcbAwaitClient( ipcbBridge*, ipcbError* );
+IPC_BRIDGE_DECLSPEC void ipcbAwaitServer( ipcbBridge*, ipcbError* );
+IPC_BRIDGE_DECLSPEC void ipcbAwaitClient( ipcbBridge*, ipcbError* );
 
-void ipcbSignalServer( ipcbBridge*, ipcbError* );
-void ipcbSignalClient( ipcbBridge*, ipcbError* );
+IPC_BRIDGE_DECLSPEC void ipcbSignalServer( ipcbBridge*, ipcbError* );
+IPC_BRIDGE_DECLSPEC void ipcbSignalClient( ipcbBridge*, ipcbError* );
 
-unsigned ipcbReadFromClient( ipcbBridge*, unsigned, void*, unsigned );
-unsigned ipcbReadFromServer( ipcbBridge*, unsigned, void*, unsigned );
+IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromClient( ipcbBridge*, unsigned, void*, unsigned );
+IPC_BRIDGE_DECLSPEC unsigned ipcbReadFromServer( ipcbBridge*, unsigned, void*, unsigned );
 
-_Bool ipcbIsServerConnectionOpen( ipcbBridge* );
-_Bool ipcbIsClientConnectionOpen( ipcbBridge* );
+IPC_BRIDGE_DECLSPEC _Bool ipcbIsServerConnectionOpen( ipcbBridge* );
+IPC_BRIDGE_DECLSPEC _Bool ipcbIsClientConnectionOpen( ipcbBridge* );
 
-const char* ipcbResolveErrorCode( ipcbError );
+IPC_BRIDGE_DECLSPEC const char* ipcbResolveErrorCode( ipcbError );
+
+//------------------------------------------
+
+#ifdef IPC_BRIDGE_DLL_EXPORT
+
+IPC_BRIDGE_DECLSPEC unsigned ipcbGetSharedMemorySize( ipcbBridge* );
+
+#endif
 
 #include "ipcbridge.c"
 
