@@ -536,7 +536,7 @@ const char* ipcbResolveErrorCode( ipcbError e ){
 
         case ipcberr_ClientConnectionAwaitFailure :
         case ipcberr_ClientConnectFailure :
-            return "Unable to establich connection to Server. Server might not be available";
+            return "Unable to establish connection to Server. Server might not be available";
 
         case ipcberr_ClientCannotIdentifyToServer :
             return "Client failed to identify to server";
@@ -555,6 +555,44 @@ const char* ipcbResolveErrorCode( ipcbError e ){
 
         default : return "Error code not recognized";
     }
+}
+
+unsigned ipcb__ReadFromSharedBuffer( _Bool* base, unsigned limit, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz ){
+
+    if( !buffer || !buffer_sz )
+        return 0;
+
+    if( buffer_sz < toread ){
+        toread = buffer_sz;
+    }
+    _Bool* upperbound = base + limit;
+    _Bool* targetadr  = base + offset;
+
+    if( upperbound < targetadr )
+        return 0;
+
+    if( upperbound < targetadr + toread ){
+        toread = upperbound - targetadr;
+    }
+
+    memcpy( buffer, targetadr, toread );
+    return toread;
+}
+
+unsigned ipcbReadFromClient( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz ){
+    return ipcb__ReadFromSharedBuffer(
+        (_Bool*) bridge->Server.MemoryAddress,
+        bridge->SharedMemorySize,
+        offset, toread, buffer, buffer_sz
+    );
+}
+
+unsigned ipcbReadFromServer( ipcbBridge* bridge, unsigned offset, unsigned toread, void* buffer, unsigned buffer_sz ){
+    return ipcb__ReadFromSharedBuffer(
+        (_Bool*) bridge->Client.MemoryAddress,
+        bridge->SharedMemorySize,
+        offset, toread, buffer, buffer_sz
+    );
 }
 
 //------------------------------------------------------------
