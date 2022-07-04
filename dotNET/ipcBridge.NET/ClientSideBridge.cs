@@ -5,10 +5,12 @@ namespace ipcBridge.NET
     internal class ClientSideBridge : IBridge
     {
         internal unsafe void* bridgehandle;
+        private string sname;
 
-        public unsafe ClientSideBridge( void* bridge)
+        public unsafe ClientSideBridge( void* bridge, string servername)
         {
             bridgehandle = bridge;
+            sname = servername;
         }
 
         public uint GetBufferSize()
@@ -29,12 +31,28 @@ namespace ipcBridge.NET
 
         public void Await()
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                UInt32 e = 0;
+                Imports.ipcbAwaitServer(bridgehandle, &e);
+                if( e != 0)
+                {
+                    throw new Exception(Imports.ipcbResolveErrorCode(e));
+                }
+            }
         }
 
         public void Signal()
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                UInt32 e = 0;
+                Imports.ipcbSignalServer(bridgehandle, &e);
+                if( e != 0)
+                {
+                    throw new Exception(Imports.ipcbResolveErrorCode(e));
+                }
+            }
         }
 
         public uint Read(byte[] buffer, uint bridgeoffset)
@@ -46,14 +64,25 @@ namespace ipcBridge.NET
 
         public uint Write(byte[] buffer, uint bridgeoffset)
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                return Imports.ipcbWriteToServer(bridgehandle, bridgeoffset, buffer);
+            }
         }
 
         public uint Write(byte[] buffer) => Write(buffer, 0);
 
         public bool isConnected()
         {
-            throw new NotImplementedException();
+            unsafe
+            {
+                return Imports.ipcbIsServerConnectionOpen(bridgehandle);
+            }
+        }
+
+        public string getServerName()
+        {
+            return sname;
         }
 
     } //End of class

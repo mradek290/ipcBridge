@@ -7,6 +7,7 @@ namespace ipcBridge.NET
         public const UInt32 DefaultBuffersize = (1 << 20);
         
         internal unsafe void* serverhandle;
+        private string servername;
         
         public void Dispose()
         {
@@ -16,16 +17,18 @@ namespace ipcBridge.NET
             }
         }
 
-        public BridgeServer( string servername)
+        public BridgeServer( string name)
         {
             unsafe
             {
                 UInt32 e = 0;
-                serverhandle = Imports.ipcbInitServer(servername, &e);
+                serverhandle = Imports.ipcbInitServer(name, &e);
                 if( e != 0 ) //error occured
                 {
                     throw new Exception(Imports.ipcbResolveErrorCode(e));
                 }
+
+                servername = name;
             }
         }
 
@@ -37,7 +40,7 @@ namespace ipcBridge.NET
                 void* handle = Imports.ipcbAwaitConnection(serverhandle, &e);
                 if( e == 0)
                 {
-                    return new ServerSideBridge(handle);
+                    return new ServerSideBridge(handle,servername);
                 }
                 else
                 {
@@ -55,7 +58,7 @@ namespace ipcBridge.NET
                 void* handle = Imports.ipcbConnectServer(servername, buffersize, &e);
                 if( e == 0)
                 {
-                    return new ClientSideBridge(handle);
+                    return new ClientSideBridge(handle,servername);
                 }
                 else
                 {
@@ -65,6 +68,12 @@ namespace ipcBridge.NET
         }
 
         public static IBridge Connect(string servername) => Connect(servername, DefaultBuffersize);
+
+        public string Name
+        {
+            get => servername;
+        }
+
 
     } //End of class
 
