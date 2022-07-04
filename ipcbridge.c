@@ -219,8 +219,6 @@ void ipcbCloseBridge( ipcbBridge* bridge, ipcbSide side ){
         CloseHandle(bridge->Client.MemoryAddress);
         CloseHandle(bridge->Client.ServerNotification);
         CloseHandle(bridge->Client.ClientNotification);
-
-        free(bridge);
     }
 
     if( side & ipcbside_Server ){
@@ -231,9 +229,9 @@ void ipcbCloseBridge( ipcbBridge* bridge, ipcbSide side ){
         CloseHandle(bridge->Server.MemoryAddress);
         CloseHandle(bridge->Server.ServerNotification);
         CloseHandle(bridge->Server.ClientNotification);
-
-        free(bridge);
     }
+
+    free(bridge);
 }
 
 ipcbBridge* ipcbAwaitConnection( ipcbServer* server, ipcbError* e ){
@@ -257,6 +255,7 @@ ipcbBridge* ipcbAwaitConnection( ipcbServer* server, ipcbError* e ){
 
     if( !readsuccess || bytesread != sizeof(clientinfo) ){
         *e = ipcberr_ServerCannotIdentifyClient;
+        DisconnectNamedPipe(pipe);
         return 0;
     }
 
